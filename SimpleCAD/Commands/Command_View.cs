@@ -3,6 +3,19 @@ using System.Threading.Tasks;
 
 namespace SimpleCAD.Commands
 {
+    public class ViewExtents : Command
+    {
+        public override string RegisteredName => "View.Extents";
+        public override string Name => "Extents";
+        public override async Task Apply(CADDocument doc, params string[] args)
+        {
+            CADView view = doc.ActiveView;
+            if (view == null) return;
+
+            Editor ed = doc.Editor;
+            view.SetViewport();
+        }
+    }
     public class ViewZoom : Command
     {
         public override string RegisteredName => "View.Zoom";

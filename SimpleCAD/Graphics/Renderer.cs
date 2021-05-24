@@ -287,7 +287,14 @@ namespace SimpleCAD.Graphics
                 gdi.ScaleTransform(1, -1, System.Drawing.Drawing2D.MatrixOrder.Prepend);
                 gdi.TranslateTransform(dx, dy, System.Drawing.Drawing2D.MatrixOrder.Prepend);
 
-                gdi.DrawString(text, font, brush, 0, 0);
+                try
+                {
+                    gdi.DrawString(text, font, brush, 0, 0);
+                }
+                catch (System.Runtime.InteropServices.ExternalException ex)
+                {
+
+                }
 
                 // Restore old transformation
                 gdi.Transform = oldTrans;

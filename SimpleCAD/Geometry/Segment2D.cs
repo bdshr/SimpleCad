@@ -58,7 +58,7 @@ namespace SimpleCAD.Geometry
             Vector2D vL = (P2 - P1);
             t = w.DotProduct(vL) / vL.DotProduct(vL);
             float dist = (w - t * vL).Length;
-            return dist < tolerance;
+            return dist < tolerance && t >=0 && t <=1;
         }
 
         public string ToString(IFormatProvider provider)

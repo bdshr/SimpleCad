@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SimpleCAD.Commands;
 using SimpleCAD.Geometry;
 
 namespace SimpleCAD
@@ -61,6 +62,10 @@ namespace SimpleCAD
         {
             if (commands.ContainsKey(registeredName))
             {
+                if(CommandInProgress)
+                {
+                    CancelLastCommand();
+                }
                 CommandInProgress = true;
                 LastCommandName = registeredName;
                 LastCommandArgs = args;
@@ -86,6 +91,32 @@ namespace SimpleCAD
             {
                 OnError(new EditorErrorEventArgs(new InvalidOperationException("Unknown command name: " + registeredName)));
             }
+        }
+
+        private void CancelLastCommand()
+        {
+            OnViewKeyDown(Document.ActiveView, new KeyEventArgs(Keys.Escape));
+        }
+
+        public void RunCommand(Command com, params string[] args)
+        {
+            CommandInProgress = true;
+
+            Command clearSelection = new Commands.SelectionClear();
+            Task runTask = com.Apply(Document, args).ContinueWith(
+                (t) =>
+                {
+                    if (t.IsFaulted)
+                        OnError(new EditorErrorEventArgs(t.Exception));
+                    else if (t.IsCompleted)
+                        clearSelection.Apply(Document, args);
+                }
+            ).ContinueWith(
+                (t) =>
+                {
+                    CommandInProgress = false;
+                }
+            );
         }
 
         public void RepeatCommand()
@@ -262,7 +293,7 @@ namespace SimpleCAD
 
         public async Task<InputResult<string>> GetSaveFilename(FilenameOptions options)
         {
-            return await OpenFilenameGetter.Run<OpenFilenameGetter>(this, options);
+            return await OpenFilenameGetter.Run<SaveFilenameGetter>(this, options);
         }
 
         public async Task<InputResult<SelectionSet>> GetSelection(string message)
@@ -475,6 +506,7 @@ namespace SimpleCAD
         {
             Error?.Invoke(this, e);
         }
+
         #endregion
     }
 }

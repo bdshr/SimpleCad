@@ -1,4 +1,5 @@
-﻿using SimpleCAD.Geometry;
+﻿using SimpleCAD.Commands;
+using SimpleCAD.Geometry;
 using SimpleCAD.Graphics;
 using System;
 using System.ComponentModel;
@@ -528,57 +529,10 @@ namespace SimpleCAD
                     if (ReferenceEquals(item, mouseDownCPItem) && mouseDownCP.Index == mouseUpCP.Index)
                     {
                         activeCP = mouseDownCP;
-                        ControlPoint cp = mouseDownCP;
-                        Drawable consItem = item.Clone();
-                        Document.Transients.Add(consItem);
-                        ResultMode result = ResultMode.Cancel;
-                        Matrix2D trans = Matrix2D.Identity;
-                        if (cp.Type == ControlPointType.Point)
-                        {
-                            var res = await Document.Editor.GetPoint(cp.Name, cp.BasePoint,
-                                (p) =>
-                                {
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans.Inverse);
-                                    trans = Matrix2D.Translation(p - cp.BasePoint);
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans);
-                                });
-                            trans = Matrix2D.Translation(res.Value - cp.BasePoint);
-                            result = res.Result;
-                        }
-                        else if (cp.Type == ControlPointType.Angle)
-                        {
-                            float orjVal = (cp.Location - cp.BasePoint).Angle;
-                            var res = await Document.Editor.GetAngle(cp.Name, cp.BasePoint,
-                                (p) =>
-                                {
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans.Inverse);
-                                    trans = Matrix2D.Rotation(cp.BasePoint, p - orjVal);
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans);
-                                });
-                            trans = Matrix2D.Rotation(cp.BasePoint, res.Value - orjVal);
-                            result = res.Result;
-                        }
-                        else if (cp.Type == ControlPointType.Distance)
-                        {
-                            Vector2D dir = (cp.Location - cp.BasePoint).Normal;
-                            float orjVal = (cp.Location - cp.BasePoint).Length;
-                            var res = await Document.Editor.GetDistance(cp.Name, cp.BasePoint,
-                                (p) =>
-                                {
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans.Inverse);
-                                    trans = Matrix2D.Scale(cp.BasePoint, p / orjVal);
-                                    consItem.TransformControlPoints(new int[] { cp.Index }, trans);
-                                });
-                            trans = Matrix2D.Scale(cp.BasePoint, res.Value / orjVal);
-                            result = res.Result;
-                        }
 
-                        // Transform the control point
-                        if (result == ResultMode.OK)
-                        {
-                            item.TransformControlPoints(new int[] { cp.Index }, trans);
-                        }
-                        Document.Transients.Remove(consItem);
+                        ControlMove cmd = new ControlMove(item, mouseDownCP);
+                        Document.Editor.RunCommand(cmd);
+
                         activeCP = null;
                     }
                 }
