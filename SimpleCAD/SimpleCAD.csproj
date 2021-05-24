@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SimpleCAD</RootNamespace>
     <AssemblyName>SimpleCAD</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\Command_Composite.cs" />
+    <Compile Include="Commands\Command_Control.cs" />
     <Compile Include="Commands\Command_Edit.cs" />
     <Compile Include="Commands\Command_View.cs" />
     <Compile Include="Document\CADDocument.cs" />
